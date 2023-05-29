@@ -1,4 +1,3 @@
-from calendar import c
 import random
 from Actions import Actions
 
@@ -30,7 +29,7 @@ class Evaluation:
                 state_prime = maze.step(selected_action, state)
                 reward = state.reward 
 
-                state.value = self.learning_rate*(reward + self.discount_factor*
+                state.value += self.learning_rate*(reward + self.discount_factor*
                                              state_prime.value - state.value)
                         
                 state = state_prime
@@ -39,7 +38,7 @@ class Evaluation:
             for col in row:
                 print("%.2f" % col.value, end=" ")
             print()
-
+        print()
 
     def SARSA(self, maze):
         
@@ -49,11 +48,10 @@ class Evaluation:
         for x in maze.maze_states:
             row = []
             for y in x:
-                for action in Actions:
-                    row.append(self.make_Q_map_of_1_state(y))
+                row.append(self.make_Q_map_of_1_state(y))
             Q_map.append(row)
 
-        for it in range(10000):
+        for it in range(1000000):
             state = self.get_random_state(maze.maze_states)
             selected_action = self.select_action_from_Q(state, Q_map)
             while True:
@@ -62,7 +60,6 @@ class Evaluation:
 
                 state_prime = maze.step(selected_action, state)
                 reward = state.reward
-
                 action_prime = self.select_action_from_Q(state_prime, Q_map)
 
 
@@ -76,14 +73,9 @@ class Evaluation:
                 state = state_prime
                 selected_action = action_prime
 
-        for row in Q_map:
-            for col in row:
-                for action in col:
-                    print(f"Position: {col[0][0].position}", end=" ")
-                    print(f"Action: {action[1]}", end=" ")
-                    print("%.2f" % col[0][2], end=" ")
-            print()
 
+        # printing Q_map for visualization in console
+        self.print_Q_map(Q_map)
 
     def Q_learning(self, maze):
         # Q(S,A) intialization
@@ -92,8 +84,7 @@ class Evaluation:
         for x in maze.maze_states:
             row = []
             for y in x:
-                for action in Actions:
-                    row.append(self.make_Q_map_of_1_state(y))
+                row.append(self.make_Q_map_of_1_state(y))
             Q_map.append(row)
 
         for it in range(10000):
@@ -106,10 +97,16 @@ class Evaluation:
                 state_prime = maze.step(selected_action, state)
                 reward = state.reward
 
+                # Q(S,A) = Q(S,A) + alpha*(R + gamma*max_a(Q(S',a)) - Q(S,A))
+                
                 Q_map[state.position[0]][state.position[1]][selected_action.value][2] += \
                     self.learning_rate*(reward + self.discount_factor* \
                     self.get_best_action(state_prime, Q_map) - \
                     Q_map[state.position[0]][state.position[1]][selected_action.value][2])
+        
+                state = state_prime
+
+        self.print_Q_map(Q_map)
 
     def select_action_from_Q(self, state, Q_Map):
         if random.random() < self.epsilon:
@@ -144,3 +141,13 @@ class Evaluation:
 
         random_state = states[random_x][random_y]
         return random_state
+
+    def print_Q_map(self, Q_map):
+        for row in Q_map:
+            for col in row:
+                print(col[0][0].position, end=" ")
+                for action in col:
+                    print(action[1].name, end=" ")
+                    print("%.2f" % action[2], end=" ")
+                print()
+            print()

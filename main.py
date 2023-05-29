@@ -37,9 +37,11 @@ def main():
     # agent.policy.print_policy()
 
     # TD learning
+    print("TD learning:")
     evaluation.temporal_difference_learning(agent.policy, maze)
 
     # # SARSA
+    print("SARSA:")
     evaluation.SARSA(maze)
 
     # # Q learning

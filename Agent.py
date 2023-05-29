@@ -23,8 +23,8 @@ class Agent:
         count = 0
         while True:
             count += 1
-            print(f"Value Iteration: {count}")
-            self.print_maze_values()
+            # print(f"Value Iteration: {count}")
+            # self.print_maze_values()
             delta = 0
 
             copy_of_maze = copy.deepcopy(self.maze.maze_states)
