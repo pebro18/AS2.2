@@ -39,6 +39,8 @@ class Evaluation:
                 print("%.2f" % col.value, end=" ")
             print()
         print()
+        return maze.maze_states
+    
 
     def SARSA(self, maze):
         
@@ -51,7 +53,7 @@ class Evaluation:
                 row.append(self.make_Q_map_of_1_state(y))
             Q_map.append(row)
 
-        for it in range(1000000):
+        for it in range(10000):
             state = self.get_random_state(maze.maze_states)
             selected_action = self.select_action_from_Q(state, Q_map)
             while True:
@@ -76,6 +78,7 @@ class Evaluation:
 
         # printing Q_map for visualization in console
         self.print_Q_map(Q_map)
+        return Q_map
 
     def Q_learning(self, maze):
         # Q(S,A) intialization
@@ -101,12 +104,13 @@ class Evaluation:
                 
                 Q_map[state.position[0]][state.position[1]][selected_action.value][2] += \
                     self.learning_rate*(reward + self.discount_factor* \
-                    self.get_best_action(state_prime, Q_map) - \
+                    self.max_a(state_prime,Q_map) - \
                     Q_map[state.position[0]][state.position[1]][selected_action.value][2])
         
                 state = state_prime
 
         self.print_Q_map(Q_map)
+        return Q_map
 
     def select_action_from_Q(self, state, Q_Map):
         if random.random() < self.epsilon:
@@ -124,6 +128,13 @@ class Evaluation:
                 best_action = action
         return best_action
 
+
+    def max_a(self, state, Q_Map):
+        max = -10000
+        for a in Actions:
+            if Q_Map[state.position[0]][state.position[1]][a.value][2] > max:
+                max = Q_Map[state.position[0]][state.position[1]][a.value][2]
+        return max
 
     def make_Q_map_of_1_state(self,state):
         Q_Map = []

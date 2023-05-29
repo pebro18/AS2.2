@@ -27,6 +27,7 @@ def main():
 
     ## Setup evaluation
     evaluation = Evaluation(learning_rate= 0.1, discount_factor= 1, epsilon= 0.1)
+    evaluation2 = Evaluation(learning_rate= 0.1, discount_factor= 0.5, epsilon= 0.1)
 
     print("Initial iteration:")
     maze.print_maze_states()
@@ -39,12 +40,14 @@ def main():
     # TD learning
     print("TD learning:")
     evaluation.temporal_difference_learning(agent.policy, maze)
+    evaluation2.temporal_difference_learning(agent.policy, maze)
 
     # # SARSA
     print("SARSA:")
     evaluation.SARSA(maze)
 
     # # Q learning
+    print("Q Learning:")
     evaluation.Q_learning(maze)
 
     # print("After TD learning:")
