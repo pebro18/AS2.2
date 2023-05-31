@@ -27,7 +27,7 @@ class Evaluation:
 
                 selected_action = policy.select_action(state)
                 state_prime = maze.step(selected_action, state)
-                reward = state.reward 
+                reward = state_prime.reward
 
                 state.value += self.learning_rate*(reward + self.discount_factor*
                                              state_prime.value - state.value)
@@ -53,7 +53,7 @@ class Evaluation:
                 row.append(self.make_Q_map_of_1_state(y))
             Q_map.append(row)
 
-        for it in range(10000):
+        for it in range(100000):
             state = self.get_random_state(maze.maze_states)
             selected_action = self.select_action_from_Q(state, Q_map)
             while True:
@@ -61,7 +61,7 @@ class Evaluation:
                     break
 
                 state_prime = maze.step(selected_action, state)
-                reward = state.reward
+                reward = state_prime.reward
                 action_prime = self.select_action_from_Q(state_prime, Q_map)
 
 
@@ -90,7 +90,7 @@ class Evaluation:
                 row.append(self.make_Q_map_of_1_state(y))
             Q_map.append(row)
 
-        for it in range(10000):
+        for it in range(100000):
             state = self.get_random_state(maze.maze_states)
             while True:
                 if state.terminal is True:
@@ -98,7 +98,7 @@ class Evaluation:
 
                 selected_action = self.select_action_from_Q(state, Q_map)
                 state_prime = maze.step(selected_action, state)
-                reward = state.reward
+                reward = state_prime.reward
 
                 # Q(S,A) = Q(S,A) + alpha*(R + gamma*max_a(Q(S',a)) - Q(S,A))
                 
