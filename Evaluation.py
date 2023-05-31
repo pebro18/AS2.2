@@ -9,7 +9,14 @@ class Evaluation:
         self.epsilon = epsilon
 
     def temporal_difference_learning(self, policy, maze):
-
+        """Temporal difference learning algorithm
+        Estimates the optimal value function from a given policy and maze
+        Based on the pseudocode from the book
+        Args:
+            policy (Policy): policy object
+            maze (Maze): maze object
+        Returns:
+            maze.maze_states (list): maze_states"""
         # bootstrapping
         for x in maze.maze_states:
             for y in x:
@@ -29,6 +36,7 @@ class Evaluation:
                 state_prime = maze.step(selected_action, state)
                 reward = state_prime.reward
 
+                # V(S) = V(S) + alpha*(R + gamma*V(S') - V(S))
                 state.value += self.learning_rate*(reward + self.discount_factor*
                                              state_prime.value - state.value)
                         
@@ -43,14 +51,20 @@ class Evaluation:
     
 
     def SARSA(self, maze):
-        
+        """SARSA algorithm
+        Estimates the optimal Q from a given maze
+        Based on the pseudocode from the book
+        Args:
+            maze (Maze): maze object
+        Returns:
+            Q_map (list): Q_map"""
         # Q(S,A) intialization
         Q_map = []
 
         for x in maze.maze_states:
             row = []
             for y in x:
-                row.append(self.make_Q_map_of_1_state(y))
+                row.append(self.make_Q_tuple_of_1_state(y))
             Q_map.append(row)
 
         for it in range(100000):
@@ -81,13 +95,20 @@ class Evaluation:
         return Q_map
 
     def Q_learning(self, maze):
+        """Q_learning algorithm
+        Generates the optimal policy given a maze
+        Based on the pseudocode from the book
+        Args:
+            maze (Maze): maze object
+        Returns:
+            Q_map (list): Q_map"""
         # Q(S,A) intialization
         Q_map = []
 
         for x in maze.maze_states:
             row = []
             for y in x:
-                row.append(self.make_Q_map_of_1_state(y))
+                row.append(self.make_Q_tuple_of_1_state(y))
             Q_map.append(row)
 
         for it in range(100000):
@@ -113,6 +134,12 @@ class Evaluation:
         return Q_map
 
     def select_action_from_Q(self, state, Q_Map):
+        """Selects action from Q_Map with epsilon greedy policy
+        Args:
+            state (State): current state
+            Q_Map (list): Q_Map
+        Returns:
+            chosen_action (Action): chosen action"""	
         if random.random() < self.epsilon:
             chosen_action = random.choice(list(Actions))
             return chosen_action
@@ -120,6 +147,12 @@ class Evaluation:
             return self.get_best_action(state, Q_Map)
     
     def get_best_action(self, state, Q_Map):
+        """Returns best action from Q_Map
+        Args:
+            state (State): current
+            Q_Map (list): Q_Map
+        Returns:
+            best_action (Action): best action"""
         max = -10000
         best_action = None
         for action in Actions:
@@ -130,13 +163,27 @@ class Evaluation:
 
 
     def max_a(self, state, Q_Map):
+        """Returns max_a(Q(S',a))
+        emulates the arg max function from the pseudocode	
+        Args:
+            state (State): current state
+            Q_Map (list): Q_Map
+        Returns:
+            max (float): max_a(Q(S',a))"""
         max = -10000
         for a in Actions:
             if Q_Map[state.position[0]][state.position[1]][a.value][2] > max:
                 max = Q_Map[state.position[0]][state.position[1]][a.value][2]
         return max
 
-    def make_Q_map_of_1_state(self,state):
+    def make_Q_tuple_of_1_state(self,state):
+        """Creates Q_Map for one state
+        Helper function for Q_learning and SARSA
+        is used to initialize Q_Map in their respective functions
+        Args:
+            state (State): current state
+        Returns:
+            Q_tuple (list): Q_tuple for one state"""
         Q_Map = []
         for action in Actions:
             if state.terminal is True:
@@ -146,7 +193,13 @@ class Evaluation:
         return Q_Map
 
     def get_random_state(self, states):
-
+        """Returns random state from states
+        Helper function for all algorithms in this class
+        every algorithm needs a random state to start an iteration with
+        Args:
+            states (list): list of states
+        Returns:
+            random_state (State): random state from states"""
         random_x = random.randint(0, len(states) - 1)
         random_y = random.randint(0, len(states[0]) - 1)
 
@@ -154,6 +207,10 @@ class Evaluation:
         return random_state
 
     def print_Q_map(self, Q_map):
+        """Prints Q_Map in console
+        Args:
+            Q_map (list): Q_Map"""
+        
         for row in Q_map:
             for col in row:
                 print(col[0][0].position, end=" ")
