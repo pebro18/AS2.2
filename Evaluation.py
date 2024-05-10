@@ -26,7 +26,7 @@ class Evaluation:
                     y.value = 0
 
         for it in range(10000):
-            state = self.get_random_state(maze.maze_states)
+            state = maze.maze_states[3][2]
             while True:
 
                 if state.terminal is True:
@@ -68,7 +68,7 @@ class Evaluation:
             Q_map.append(row)
 
         for it in range(100000):
-            state = self.get_random_state(maze.maze_states)
+            state = maze.maze_states[3][2]
             selected_action = self.select_action_from_Q(state, Q_map)
             while True:
                 if state.terminal is True:
@@ -111,8 +111,8 @@ class Evaluation:
                 row.append(self.make_Q_tuple_of_1_state(y))
             Q_map.append(row)
 
-        for it in range(100000):
-            state = self.get_random_state(maze.maze_states)
+        for it in range(10000):
+            state = maze.maze_states[3][2]
             while True:
                 if state.terminal is True:
                     break
@@ -132,6 +132,52 @@ class Evaluation:
 
         self.print_Q_map(Q_map)
         return Q_map
+    
+    def double_Q_learning(self, maze):
+        Q_map_1 = []
+        Q_map_2 = []
+
+        for x in maze.maze_states:
+            row = []
+            for y in x:
+                row.append(self.make_Q_tuple_of_1_state(y))
+            Q_map_1.append(row)
+            Q_map_2.append(row)
+
+        for it in range(10000):
+            state = maze.maze_states[3][2]
+            while True:
+                if state.terminal is True:
+                    break
+
+                #A
+                selected_action = self.select_action_from_Q_double(state, Q_map_1, Q_map_2)
+                #S'
+                state_prime = maze.step(selected_action, state)
+                #R
+                reward = state_prime.reward
+            
+                # Q(S,A) = Q(S,A) + alpha*(R + gamma*max_a(Q(S',a)) - Q(S,A))
+
+                # Q_1(S,A) = Q1(S,A) + alpha*(R + gamma*Q_2(S',argmax_a(Q_1(S',a))) - Q_1(S,A))
+                
+                if random.random() < 0.5:
+                    Q_map_1[state.position[0]][state.position[1]][selected_action.value][2] += \
+                    self.learning_rate*(reward + self.discount_factor* \
+                    Q_map_2[state_prime.position[0]][state_prime.position[1]][self.get_best_action(state_prime,Q_map_1).value][2] - \
+                    Q_map_1[state.position[0]][state.position[1]][selected_action.value][2])
+                else:
+                    Q_map_2[state.position[0]][state.position[1]][selected_action.value][2] += \
+                    self.learning_rate*(reward + self.discount_factor* \
+                    Q_map_1[state_prime.position[0]][state_prime.position[1]][self.get_best_action(state_prime,Q_map_2).value][2] - \
+                    Q_map_2[state.position[0]][state.position[1]][selected_action.value][2])
+        
+                state = state_prime
+
+        self.print_Q_map(Q_map_1)
+        self.print_Q_map(Q_map_2)
+        return Q_map_1, Q_map_2
+
 
     def select_action_from_Q(self, state, Q_Map):
         """Selects action from Q_Map with epsilon greedy policy
@@ -146,6 +192,20 @@ class Evaluation:
         else:
             return self.get_best_action(state, Q_Map)
     
+    def select_action_from_Q_double(self, state, Q_Map_1, Q_Map_2):
+        if random.random() < self.epsilon:
+            chosen_action = random.choice(list(Actions))
+            return chosen_action
+        else:
+            Q1_action = self.get_best_action(state, Q_Map_1)
+            Q2_action = self.get_best_action(state, Q_Map_2)
+
+            if Q_Map_1[state.position[0]][state.position[1]][Q1_action.value][2] > Q_Map_2[state.position[0]][state.position[1]][Q2_action.value][2]:
+                return Q1_action
+            else:
+                return Q2_action
+
+
     def get_best_action(self, state, Q_Map):
         """Returns best action from Q_Map
         Args:

@@ -50,6 +50,10 @@ def main():
     print("Q Learning:")
     evaluation.Q_learning(maze)
 
+    print("Double Q Learning:")
+    evaluation.double_Q_learning(maze)
+
+
     # print("After TD learning:")
     # maze.print_maze_states()
     
